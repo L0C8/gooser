@@ -361,6 +361,12 @@
   font-size: 0.95rem;
 }
 
+.user-list .user-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
 .user-list .admin-badge {
   font-size: 0.7rem;
   color: #f5c542;
@@ -369,6 +375,21 @@
   border-radius: 999px;
   padding: 0.1rem 0.45rem;
   white-space: nowrap;
+}
+
+.user-list .kick-user-btn {
+  background: #2a2a2a;
+  color: #ff7b7b;
+  border: 1px solid #3a3a3a;
+  border-radius: 6px;
+  padding: 0.15rem 0.5rem;
+  font-size: 0.7rem;
+  cursor: pointer;
+}
+
+.user-list .kick-user-btn:hover {
+  background: #3a1f1f;
+  border-color: #5a2a2a;
 }
 
 .user-list li:last-child {

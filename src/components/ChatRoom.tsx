@@ -42,6 +42,8 @@ export default function ChatRoom({ username, color, isAdmin, onLogout }: ChatRoo
         users={users}
         isOpen={showUsers}
         onClose={() => setShowUsers(false)}
+        isAdmin={isAdmin}
+        currentUsername={username}
       />
     </div>
   );

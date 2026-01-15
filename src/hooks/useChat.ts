@@ -86,5 +86,9 @@ export function useAdminActions() {
     chatService.deleteMessage(messageId);
   }, []);
 
-  return { resetPassword, deleteMessage };
+  const kickUser = useCallback((targetUsername: string) => {
+    chatService.kickUser(targetUsername);
+  }, []);
+
+  return { resetPassword, deleteMessage, kickUser };
 }
