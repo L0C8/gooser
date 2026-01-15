@@ -1,9 +1,13 @@
-import { useState } from 'react';
+import { useState, FormEvent } from 'react';
 
-export default function MessageInput({ onSend }) {
+interface MessageInputProps {
+  onSend: (message: string) => void;
+}
+
+export default function MessageInput({ onSend }: MessageInputProps) {
   const [message, setMessage] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (message.trim()) {
       onSend(message.trim());
