@@ -28,7 +28,7 @@ function App() {
   return (
     <div className="app">
       {user ? (
-        <ChatRoom username={user.username} color={user.color} isAdmin={user.isAdmin} onLogout={handleLogout} />
+        <ChatRoom username={user.username} color={user.color} isAdmin={user.isAdmin} isGuest={user.isGuest} onLogout={handleLogout} />
       ) : (
         <AuthForm onSuccess={handleAuthSuccess} />
       )}

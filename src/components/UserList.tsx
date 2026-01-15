@@ -1,6 +1,12 @@
 import type { User } from '../types/chat';
 import { useAdminActions } from '../hooks/useChat';
 
+const SERVER_PORT = 3001;
+
+function getAvatarUrl(username: string): string {
+  return `${window.location.protocol}//${window.location.hostname}:${SERVER_PORT}/avatar/${encodeURIComponent(username)}`;
+}
+
 interface UserListProps {
   users: User[];
   isOpen: boolean;
@@ -35,13 +41,18 @@ export default function UserList({ users, isOpen, onClose, isAdmin, currentUsern
           {users.map((user, index) => {
             const showActions = user.isAdmin || (isAdmin && user.username !== currentUsername);
             return (
-              <li key={index} style={{ color: user.color }}>
-                <span className="user-name">{user.username}</span>
+              <li key={index}>
+                <img
+                  src={getAvatarUrl(user.username)}
+                  alt={`${user.username}'s avatar`}
+                  className="avatar avatar-small"
+                />
+                <span className="user-name" style={{ color: user.color }}>{user.username}</span>
                 {showActions && (
                   <span className="user-actions">
                     {user.isAdmin && (
                       <span className="admin-badge" aria-label="Admin">
-                        👑 Admin
+                        Admin
                       </span>
                     )}
                     {isAdmin && user.username !== currentUsername && (
