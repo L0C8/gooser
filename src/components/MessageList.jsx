@@ -25,7 +25,7 @@ export default function MessageList({ messages, currentUser }) {
             <span className="system-text">{msg.text}</span>
           ) : (
             <>
-              <span className="username">{msg.username}</span>
+              <span className="username" style={{ color: msg.color }}>{msg.username}</span>
               <span className="text">{msg.text}</span>
               <span className="time">{formatTime(msg.timestamp)}</span>
             </>

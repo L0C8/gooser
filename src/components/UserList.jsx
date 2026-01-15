@@ -14,7 +14,7 @@ export default function UserList({ users, isOpen, onClose }) {
         </div>
         <ul>
           {users.map((user, index) => (
-            <li key={index}>{user}</li>
+            <li key={index} style={{ color: user.color }}>{user.username}</li>
           ))}
         </ul>
       </div>

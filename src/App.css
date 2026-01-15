@@ -46,6 +46,44 @@
   background: #535bf2;
 }
 
+/* Color Picker */
+.color-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+.color-picker label {
+  font-size: 0.9rem;
+  color: #888;
+}
+
+.color-options {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.color-option {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.15s, border-color 0.15s;
+}
+
+.color-option:hover {
+  transform: scale(1.15);
+}
+
+.color-option.selected {
+  border-color: #fff;
+  transform: scale(1.15);
+}
+
 /* Chat Room */
 .chat-room {
   display: flex;
@@ -117,12 +155,7 @@
   display: block;
   font-size: 0.8rem;
   font-weight: bold;
-  color: #aaa;
   margin-bottom: 0.25rem;
-}
-
-.message.own .username {
-  color: rgba(255, 255, 255, 0.7);
 }
 
 .message .text {

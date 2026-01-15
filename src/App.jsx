@@ -4,14 +4,14 @@ import ChatRoom from './components/ChatRoom';
 import './App.css';
 
 function App() {
-  const [username, setUsername] = useState(null);
+  const [user, setUser] = useState(null);
 
   return (
     <div className="app">
-      {username ? (
-        <ChatRoom username={username} />
+      {user ? (
+        <ChatRoom username={user.username} color={user.color} />
       ) : (
-        <JoinForm onJoin={setUsername} />
+        <JoinForm onJoin={setUser} />
       )}
     </div>
   );
