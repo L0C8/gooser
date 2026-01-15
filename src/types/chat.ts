@@ -54,4 +54,5 @@ export interface ClientToServerEvents {
   chat: (message: string) => void;
   resetPassword: (data: { targetUsername: string; newPassword: string }) => void;
   deleteMessage: (messageId: string) => void;
+  kickUser: (data: { targetUsername: string }) => void;
 }

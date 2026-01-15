@@ -105,6 +105,10 @@ class ChatService {
     this.socket.emit('deleteMessage', messageId);
   }
 
+  public kickUser(targetUsername: string): void {
+    this.socket.emit('kickUser', { targetUsername });
+  }
+
   public disconnect(): void {
     this.socket.disconnect();
   }
