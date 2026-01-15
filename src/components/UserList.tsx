@@ -18,7 +18,8 @@ interface UserListProps {
 export default function UserList({ users, isOpen, onClose, isAdmin, currentUsername }: UserListProps) {
   const { kickUser } = useAdminActions();
   const onlineUsers = users.filter(user => user.isOnline);
-  const offlineUsers = users.filter(user => !user.isOnline);
+  // Only show registered users (non-guests) in offline section
+  const offlineUsers = users.filter(user => !user.isOnline && !user.isGuest);
 
   const handleKick = (username: string) => {
     if (confirm(`Kick ${username} from the chat?`)) {
