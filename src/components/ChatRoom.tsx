@@ -22,6 +22,7 @@ interface ChatRoomProps {
 export default function ChatRoom({ username, color, isAdmin, isGuest, onLogout }: ChatRoomProps) {
   const messages = useMessages();
   const users = useUsers();
+  const onlineCount = users.filter(user => user.isOnline).length;
   const { sendMessage } = useChatActions();
   const [showUsers, setShowUsers] = useState(false);
   const [showAvatarUpload, setShowAvatarUpload] = useState(false);
@@ -53,7 +54,7 @@ export default function ChatRoom({ username, color, isAdmin, isGuest, onLogout }
               className="mobile-users-toggle"
               onClick={() => setShowUsers(true)}
             >
-              Users ({users.length})
+              Users ({onlineCount}/{users.length})
             </button>
           </div>
         </header>

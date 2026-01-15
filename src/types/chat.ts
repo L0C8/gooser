@@ -3,6 +3,7 @@ export interface User {
   color: string;
   isGuest: boolean;
   isAdmin: boolean;
+  isOnline: boolean;
 }
 
 export interface SystemMessage {
