@@ -468,6 +468,7 @@
 
   /* User List - Mobile (slide-in panel) */
   .user-list {
+    display: none;
     position: fixed;
     top: 0;
     right: -260px;
@@ -480,6 +481,7 @@
   }
 
   .user-list.open {
+    display: block;
     right: 0;
   }
 
