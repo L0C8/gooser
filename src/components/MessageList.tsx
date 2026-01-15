@@ -49,7 +49,7 @@ export default function MessageList({ messages, currentUser, isAdmin }: MessageL
             ) : (
               <div className="message-content">
                 <img
-                  src={getAvatarUrl(msg.username)}
+                  src={`${getAvatarUrl(msg.username)}?t=${msg.timestamp}`}
                   alt={`${msg.username}'s avatar`}
                   className="message-avatar"
                 />

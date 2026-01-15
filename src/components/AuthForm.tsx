@@ -59,7 +59,7 @@ export default function AuthForm({ onSuccess }: AuthFormProps) {
     } else if (mode === 'register') {
       register(trimmedUsername, password, selectedColor);
     } else {
-      guestJoin(trimmedUsername, selectedColor);
+      guestJoin(trimmedUsername, '#888888'); // Guests always grey
     }
   };
 
@@ -111,7 +111,7 @@ export default function AuthForm({ onSuccess }: AuthFormProps) {
           />
         )}
 
-        {(mode === 'register' || mode === 'guest') && (
+        {mode === 'register' && (
           <div className="color-picker">
             <label>Choose your color:</label>
             <div className="color-options">

@@ -43,7 +43,7 @@ export default function UserList({ users, isOpen, onClose, isAdmin, currentUsern
             return (
               <li key={index}>
                 <img
-                  src={getAvatarUrl(user.username)}
+                  src={`${getAvatarUrl(user.username)}?v=1`}
                   alt={`${user.username}'s avatar`}
                   className="avatar avatar-small"
                 />

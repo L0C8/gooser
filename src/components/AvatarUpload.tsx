@@ -30,7 +30,6 @@ export default function AvatarUpload({ username, currentAvatarUrl, onUploadSucce
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [crop, setCrop] = useState<Crop>();
   const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
-  const [password, setPassword] = useState('');
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
   const imgRef = useRef<HTMLImageElement>(null);
@@ -54,8 +53,8 @@ export default function AvatarUpload({ username, currentAvatarUrl, onUploadSucce
   }, []);
 
   const handleUpload = async () => {
-    if (!selectedFile || !password) {
-      setError('Please select an image and enter your password');
+    if (!selectedFile) {
+      setError('Please select an image');
       return;
     }
 
@@ -71,7 +70,6 @@ export default function AvatarUpload({ username, currentAvatarUrl, onUploadSucce
       const formData = new FormData();
       formData.append('avatar', selectedFile);
       formData.append('username', username);
-      formData.append('password', password);
 
       // Send crop as pixel values relative to natural image dimensions
       if (imgRef.current && completedCrop) {
@@ -145,14 +143,6 @@ export default function AvatarUpload({ username, currentAvatarUrl, onUploadSucce
             </ReactCrop>
           </div>
         )}
-
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Enter your password to confirm"
-          className="password-input"
-        />
 
         {error && <div className="upload-error">{error}</div>}
 
