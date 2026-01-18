@@ -47,6 +47,7 @@ export interface Room {
   createdAt: number;
   members: string[]; // usernames of members
   isPublic: boolean;
+  characters?: RoomCharacter[]; // AI characters in the room
 }
 
 export interface RoomResult {
@@ -54,6 +55,54 @@ export interface RoomResult {
   error?: string;
   room?: Room;
   rooms?: Room[];
+}
+
+// Character card types (SillyTavern compatible)
+export interface CharacterCard {
+  id: string;
+  name: string;
+  description: string;
+  personality: string;
+  scenario: string;
+  first_mes: string;
+  mes_example: string;
+  system_prompt: string;
+  creator_notes: string;
+  tags: string[];
+  avatar?: string; // filename
+  createdAt: number;
+  createdBy: string;
+}
+
+// API configuration types
+export type APIProvider =
+  | 'openai'
+  | 'anthropic'
+  | 'openrouter'
+  | 'kobold'
+  | 'ollama'
+  | 'custom';
+
+export interface APIConfig {
+  id: string;
+  name: string;
+  provider: APIProvider;
+  apiKey?: string;
+  apiUrl?: string;
+  model: string;
+  maxTokens: number;
+  temperature: number;
+  isActive: boolean;
+  createdAt: number;
+}
+
+// Room character assignment
+export interface RoomCharacter {
+  characterId: string;
+  apiConfigId: string;
+  triggerOnMention: boolean;
+  triggerOnMessage: boolean;
+  triggerProbability: number; // 0-100 for random triggers
 }
 
 // Socket.io event payloads
@@ -68,6 +117,11 @@ export interface ServerToClientEvents {
   roomResult: (result: RoomResult) => void;
   rooms: (rooms: Room[]) => void;
   roomUsers: (users: User[]) => void;
+  // Character/AI events
+  characters: (characters: CharacterCard[]) => void;
+  apiConfigs: (configs: APIConfig[]) => void;
+  characterResult: (result: { success: boolean; error?: string; character?: CharacterCard }) => void;
+  apiConfigResult: (result: { success: boolean; error?: string; config?: APIConfig }) => void;
 }
 
 export interface ClientToServerEvents {
@@ -84,4 +138,17 @@ export interface ClientToServerEvents {
   leaveRoom: (roomId: string) => void;
   getRooms: () => void;
   getMyRooms: () => void;
+  // Character events (admin only)
+  getCharacters: () => void;
+  createCharacter: (data: Omit<CharacterCard, 'id' | 'createdAt' | 'createdBy'>) => void;
+  updateCharacter: (data: CharacterCard) => void;
+  deleteCharacter: (characterId: string) => void;
+  // API config events (admin only)
+  getAPIConfigs: () => void;
+  createAPIConfig: (data: Omit<APIConfig, 'id' | 'createdAt'>) => void;
+  updateAPIConfig: (data: APIConfig) => void;
+  deleteAPIConfig: (configId: string) => void;
+  // Room character management (admin only)
+  addCharacterToRoom: (data: { roomId: string; character: RoomCharacter }) => void;
+  removeCharacterFromRoom: (data: { roomId: string; characterId: string }) => void;
 }

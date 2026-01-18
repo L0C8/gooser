@@ -1,6 +1,6 @@
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
-import type { Message, User, ConnectionStatus, AuthResult, AdminResult, Room, RoomResult, ServerToClientEvents, ClientToServerEvents } from '../types/chat';
+import type { Message, User, ConnectionStatus, AuthResult, AdminResult, Room, RoomResult, CharacterCard, APIConfig, RoomCharacter, ServerToClientEvents, ClientToServerEvents } from '../types/chat';
 
 const SERVER_PORT = 3001;
 
@@ -16,6 +16,10 @@ class ChatService {
   private roomResultSubject = new Subject<RoomResult>();
   private roomUsersSubject = new BehaviorSubject<User[]>([]);
   private currentRoomSubject = new BehaviorSubject<Room | null>(null);
+  private charactersSubject = new BehaviorSubject<CharacterCard[]>([]);
+  private apiConfigsSubject = new BehaviorSubject<APIConfig[]>([]);
+  private characterResultSubject = new Subject<{ success: boolean; error?: string; character?: CharacterCard }>();
+  private apiConfigResultSubject = new Subject<{ success: boolean; error?: string; config?: APIConfig }>();
 
   public messages$: Observable<Message[]> = this.messagesSubject.asObservable();
   public users$: Observable<User[]> = this.usersSubject.asObservable();
@@ -26,6 +30,10 @@ class ChatService {
   public roomResult$: Observable<RoomResult> = this.roomResultSubject.asObservable();
   public roomUsers$: Observable<User[]> = this.roomUsersSubject.asObservable();
   public currentRoom$: Observable<Room | null> = this.currentRoomSubject.asObservable();
+  public characters$: Observable<CharacterCard[]> = this.charactersSubject.asObservable();
+  public apiConfigs$: Observable<APIConfig[]> = this.apiConfigsSubject.asObservable();
+  public characterResult$: Observable<{ success: boolean; error?: string; character?: CharacterCard }> = this.characterResultSubject.asObservable();
+  public apiConfigResult$: Observable<{ success: boolean; error?: string; config?: APIConfig }> = this.apiConfigResultSubject.asObservable();
 
   constructor() {
     const serverUrl = `${window.location.protocol}//${window.location.hostname}:${SERVER_PORT}`;
@@ -37,6 +45,7 @@ class ChatService {
     this.setupAuthStream();
     this.setupAdminStream();
     this.setupRoomStream();
+    this.setupCharacterStream();
   }
 
   private setupConnectionEvents(): void {
@@ -111,6 +120,24 @@ class ChatService {
     });
   }
 
+  private setupCharacterStream(): void {
+    this.socket.on('characters', (characters: CharacterCard[]) => {
+      this.charactersSubject.next(characters);
+    });
+
+    this.socket.on('apiConfigs', (configs: APIConfig[]) => {
+      this.apiConfigsSubject.next(configs);
+    });
+
+    this.socket.on('characterResult', (result) => {
+      this.characterResultSubject.next(result);
+    });
+
+    this.socket.on('apiConfigResult', (result) => {
+      this.apiConfigResultSubject.next(result);
+    });
+  }
+
   public register(username: string, password: string, color: string): void {
     this.socket.emit('register', { username, password, color });
   }
@@ -172,8 +199,53 @@ class ChatService {
     this.roomsSubject.next([]);
     this.currentRoomSubject.next(null);
     this.roomUsersSubject.next([]);
+    this.charactersSubject.next([]);
+    this.apiConfigsSubject.next([]);
     // Reconnect socket
     this.socket.connect();
+  }
+
+  // Character methods (admin only)
+  public getCharacters(): void {
+    this.socket.emit('getCharacters');
+  }
+
+  public createCharacter(data: Omit<CharacterCard, 'id' | 'createdAt' | 'createdBy'>): void {
+    this.socket.emit('createCharacter', data);
+  }
+
+  public updateCharacter(character: CharacterCard): void {
+    this.socket.emit('updateCharacter', character);
+  }
+
+  public deleteCharacter(characterId: string): void {
+    this.socket.emit('deleteCharacter', characterId);
+  }
+
+  // API Config methods (admin only)
+  public getAPIConfigs(): void {
+    this.socket.emit('getAPIConfigs');
+  }
+
+  public createAPIConfig(data: Omit<APIConfig, 'id' | 'createdAt'>): void {
+    this.socket.emit('createAPIConfig', data);
+  }
+
+  public updateAPIConfig(config: APIConfig): void {
+    this.socket.emit('updateAPIConfig', config);
+  }
+
+  public deleteAPIConfig(configId: string): void {
+    this.socket.emit('deleteAPIConfig', configId);
+  }
+
+  // Room character management (admin only)
+  public addCharacterToRoom(roomId: string, character: RoomCharacter): void {
+    this.socket.emit('addCharacterToRoom', { roomId, character });
+  }
+
+  public removeCharacterFromRoom(roomId: string, characterId: string): void {
+    this.socket.emit('removeCharacterFromRoom', { roomId, characterId });
   }
 }
 

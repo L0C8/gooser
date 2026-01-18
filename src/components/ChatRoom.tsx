@@ -3,6 +3,7 @@ import MessageList from './MessageList';
 import MessageInput from './MessageInput';
 import UserList from './UserList';
 import AvatarUpload from './AvatarUpload';
+import AdminPanel from './AdminPanel';
 import { useMessages, useRoomUsers, useChatActions } from '../hooks/useChat';
 import type { Room } from '../types/chat';
 
@@ -29,6 +30,7 @@ export default function ChatRoom({ username, color, isAdmin, isGuest, room, onLo
   const { sendMessage } = useChatActions();
   const [showUsers, setShowUsers] = useState(false);
   const [showAvatarUpload, setShowAvatarUpload] = useState(false);
+  const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [avatarKey, setAvatarKey] = useState(Date.now()); // Force refresh after upload
 
   const handleAvatarUploadSuccess = () => {
@@ -64,6 +66,11 @@ export default function ChatRoom({ username, color, isAdmin, isGuest, room, onLo
             <button className="logout-btn" onClick={onLogout}>
               Logout
             </button>
+            {isAdmin && (
+              <button className="admin-btn" onClick={() => setShowAdminPanel(true)}>
+                Admin
+              </button>
+            )}
             <button
               className="mobile-users-toggle"
               onClick={() => setShowUsers(true)}
@@ -89,6 +96,9 @@ export default function ChatRoom({ username, color, isAdmin, isGuest, room, onLo
           onUploadSuccess={handleAvatarUploadSuccess}
           onClose={() => setShowAvatarUpload(false)}
         />
+      )}
+      {showAdminPanel && (
+        <AdminPanel onClose={() => setShowAdminPanel(false)} />
       )}
     </div>
   );

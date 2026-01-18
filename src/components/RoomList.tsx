@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useRooms, useRoomActions, useRoomResult } from '../hooks/useChat';
+import { useRooms, useRoomActions, useRoomResult, useConnectionStatus } from '../hooks/useChat';
 import type { Room } from '../types/chat';
 
 interface RoomListProps {
@@ -12,12 +12,29 @@ interface RoomListProps {
 export default function RoomList({ username, isGuest, onJoinRoom, onCreateRoom }: RoomListProps) {
   const rooms = useRooms();
   const roomResult = useRoomResult();
-  const { joinRoom, getMyRooms } = useRoomActions();
+  const connectionStatus = useConnectionStatus();
+  const { joinRoom, getRooms } = useRoomActions();
   const [joining, setJoining] = useState<string | null>(null);
+  const [hasFetched, setHasFetched] = useState(false);
 
+  // Fetch rooms when component mounts or connection is restored
   useEffect(() => {
-    getMyRooms();
-  }, [getMyRooms]);
+    if (connectionStatus === 'connected') {
+      getRooms();
+      setHasFetched(true);
+    }
+  }, [connectionStatus, getRooms]);
+
+  // Also refetch periodically to catch new public rooms
+  useEffect(() => {
+    if (connectionStatus !== 'connected') return;
+
+    const interval = setInterval(() => {
+      getRooms();
+    }, 30000); // Refresh every 30 seconds
+
+    return () => clearInterval(interval);
+  }, [connectionStatus, getRooms]);
 
   useEffect(() => {
     if (roomResult?.success && roomResult.room) {
@@ -35,6 +52,18 @@ export default function RoomList({ username, isGuest, onJoinRoom, onCreateRoom }
 
   const myRooms = rooms.filter(r => r.members.includes(username.toLowerCase()));
   const publicRooms = rooms.filter(r => r.isPublic && !r.members.includes(username.toLowerCase()));
+  const isLoading = connectionStatus !== 'connected' || (!hasFetched && rooms.length === 0);
+
+  if (isLoading) {
+    return (
+      <div className="room-list-page">
+        <div className="room-list-header">
+          <h1>Gooser Chat</h1>
+          <p>Loading rooms...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="room-list-page">

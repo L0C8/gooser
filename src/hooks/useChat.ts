@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { chatService } from '../services/ChatService';
-import type { Message, User, ConnectionStatus, AuthResult, AdminResult, Room, RoomResult } from '../types/chat';
+import type { Message, User, ConnectionStatus, AuthResult, AdminResult, Room, RoomResult, CharacterCard, APIConfig, RoomCharacter } from '../types/chat';
 
 export function useMessages(): Message[] {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -160,4 +160,103 @@ export function useRoomActions() {
   }, []);
 
   return { createRoom, joinRoom, leaveRoom, getRooms, getMyRooms };
+}
+
+// Character hooks (admin only)
+export function useCharacters(): CharacterCard[] {
+  const [characters, setCharacters] = useState<CharacterCard[]>([]);
+
+  useEffect(() => {
+    const subscription = chatService.characters$.subscribe(setCharacters);
+    return () => subscription.unsubscribe();
+  }, []);
+
+  return characters;
+}
+
+export function useCharacterResult(): { success: boolean; error?: string; character?: CharacterCard } | null {
+  const [result, setResult] = useState<{ success: boolean; error?: string; character?: CharacterCard } | null>(null);
+
+  useEffect(() => {
+    const subscription = chatService.characterResult$.subscribe(setResult);
+    return () => subscription.unsubscribe();
+  }, []);
+
+  return result;
+}
+
+export function useCharacterActions() {
+  const getCharacters = useCallback(() => {
+    chatService.getCharacters();
+  }, []);
+
+  const createCharacter = useCallback((data: Omit<CharacterCard, 'id' | 'createdAt' | 'createdBy'>) => {
+    chatService.createCharacter(data);
+  }, []);
+
+  const updateCharacter = useCallback((character: CharacterCard) => {
+    chatService.updateCharacter(character);
+  }, []);
+
+  const deleteCharacter = useCallback((characterId: string) => {
+    chatService.deleteCharacter(characterId);
+  }, []);
+
+  return { getCharacters, createCharacter, updateCharacter, deleteCharacter };
+}
+
+// API Config hooks (admin only)
+export function useAPIConfigs(): APIConfig[] {
+  const [configs, setConfigs] = useState<APIConfig[]>([]);
+
+  useEffect(() => {
+    const subscription = chatService.apiConfigs$.subscribe(setConfigs);
+    return () => subscription.unsubscribe();
+  }, []);
+
+  return configs;
+}
+
+export function useAPIConfigResult(): { success: boolean; error?: string; config?: APIConfig } | null {
+  const [result, setResult] = useState<{ success: boolean; error?: string; config?: APIConfig } | null>(null);
+
+  useEffect(() => {
+    const subscription = chatService.apiConfigResult$.subscribe(setResult);
+    return () => subscription.unsubscribe();
+  }, []);
+
+  return result;
+}
+
+export function useAPIConfigActions() {
+  const getAPIConfigs = useCallback(() => {
+    chatService.getAPIConfigs();
+  }, []);
+
+  const createAPIConfig = useCallback((data: Omit<APIConfig, 'id' | 'createdAt'>) => {
+    chatService.createAPIConfig(data);
+  }, []);
+
+  const updateAPIConfig = useCallback((config: APIConfig) => {
+    chatService.updateAPIConfig(config);
+  }, []);
+
+  const deleteAPIConfig = useCallback((configId: string) => {
+    chatService.deleteAPIConfig(configId);
+  }, []);
+
+  return { getAPIConfigs, createAPIConfig, updateAPIConfig, deleteAPIConfig };
+}
+
+// Room character management hooks (admin only)
+export function useRoomCharacterActions() {
+  const addCharacterToRoom = useCallback((roomId: string, character: RoomCharacter) => {
+    chatService.addCharacterToRoom(roomId, character);
+  }, []);
+
+  const removeCharacterFromRoom = useCallback((roomId: string, characterId: string) => {
+    chatService.removeCharacterFromRoom(roomId, characterId);
+  }, []);
+
+  return { addCharacterToRoom, removeCharacterFromRoom };
 }
