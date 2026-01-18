@@ -1,6 +1,6 @@
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
-import type { Message, User, ConnectionStatus, AuthResult, AdminResult, ServerToClientEvents, ClientToServerEvents } from '../types/chat';
+import type { Message, User, ConnectionStatus, AuthResult, AdminResult, Room, RoomResult, ServerToClientEvents, ClientToServerEvents } from '../types/chat';
 
 const SERVER_PORT = 3001;
 
@@ -12,12 +12,20 @@ class ChatService {
   private connectionStatusSubject = new BehaviorSubject<ConnectionStatus>('connecting');
   private authResultSubject = new Subject<AuthResult>();
   private adminResultSubject = new Subject<AdminResult>();
+  private roomsSubject = new BehaviorSubject<Room[]>([]);
+  private roomResultSubject = new Subject<RoomResult>();
+  private roomUsersSubject = new BehaviorSubject<User[]>([]);
+  private currentRoomSubject = new BehaviorSubject<Room | null>(null);
 
   public messages$: Observable<Message[]> = this.messagesSubject.asObservable();
   public users$: Observable<User[]> = this.usersSubject.asObservable();
   public connectionStatus$: Observable<ConnectionStatus> = this.connectionStatusSubject.asObservable();
   public authResult$: Observable<AuthResult> = this.authResultSubject.asObservable();
   public adminResult$: Observable<AdminResult> = this.adminResultSubject.asObservable();
+  public rooms$: Observable<Room[]> = this.roomsSubject.asObservable();
+  public roomResult$: Observable<RoomResult> = this.roomResultSubject.asObservable();
+  public roomUsers$: Observable<User[]> = this.roomUsersSubject.asObservable();
+  public currentRoom$: Observable<Room | null> = this.currentRoomSubject.asObservable();
 
   constructor() {
     const serverUrl = `${window.location.protocol}//${window.location.hostname}:${SERVER_PORT}`;
@@ -28,6 +36,7 @@ class ChatService {
     this.setupUsersStream();
     this.setupAuthStream();
     this.setupAdminStream();
+    this.setupRoomStream();
   }
 
   private setupConnectionEvents(): void {
@@ -81,6 +90,27 @@ class ChatService {
     });
   }
 
+  private setupRoomStream(): void {
+    this.socket.on('rooms', (rooms: Room[]) => {
+      this.roomsSubject.next(rooms);
+    });
+
+    this.socket.on('roomResult', (result: RoomResult) => {
+      this.roomResultSubject.next(result);
+      if (result.success && result.room) {
+        this.currentRoomSubject.next(result.room);
+      }
+      // If leaving room, clear current room
+      if (result.success && !result.room && !result.rooms) {
+        this.currentRoomSubject.next(null);
+      }
+    });
+
+    this.socket.on('roomUsers', (users: User[]) => {
+      this.roomUsersSubject.next(users);
+    });
+  }
+
   public register(username: string, password: string, color: string): void {
     this.socket.emit('register', { username, password, color });
   }
@@ -109,6 +139,28 @@ class ChatService {
     this.socket.emit('kickUser', { targetUsername });
   }
 
+  // Room methods
+  public createRoom(name: string, description: string, isPublic: boolean): void {
+    this.socket.emit('createRoom', { name, description, isPublic });
+  }
+
+  public joinRoom(roomId: string): void {
+    this.socket.emit('joinRoom', roomId);
+  }
+
+  public leaveRoom(roomId: string): void {
+    this.socket.emit('leaveRoom', roomId);
+    this.currentRoomSubject.next(null);
+  }
+
+  public getRooms(): void {
+    this.socket.emit('getRooms');
+  }
+
+  public getMyRooms(): void {
+    this.socket.emit('getMyRooms');
+  }
+
   public disconnect(): void {
     this.socket.disconnect();
   }
@@ -117,6 +169,9 @@ class ChatService {
     // Clear local state
     this.messagesSubject.next([]);
     this.usersSubject.next([]);
+    this.roomsSubject.next([]);
+    this.currentRoomSubject.next(null);
+    this.roomUsersSubject.next([]);
     // Reconnect socket
     this.socket.connect();
   }

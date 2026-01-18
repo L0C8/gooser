@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { chatService } from '../services/ChatService';
-import type { Message, User, ConnectionStatus, AuthResult, AdminResult } from '../types/chat';
+import type { Message, User, ConnectionStatus, AuthResult, AdminResult, Room, RoomResult } from '../types/chat';
 
 export function useMessages(): Message[] {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -91,4 +91,73 @@ export function useAdminActions() {
   }, []);
 
   return { resetPassword, deleteMessage, kickUser };
+}
+
+// Room hooks
+export function useRooms(): Room[] {
+  const [rooms, setRooms] = useState<Room[]>([]);
+
+  useEffect(() => {
+    const subscription = chatService.rooms$.subscribe(setRooms);
+    return () => subscription.unsubscribe();
+  }, []);
+
+  return rooms;
+}
+
+export function useCurrentRoom(): Room | null {
+  const [currentRoom, setCurrentRoom] = useState<Room | null>(null);
+
+  useEffect(() => {
+    const subscription = chatService.currentRoom$.subscribe(setCurrentRoom);
+    return () => subscription.unsubscribe();
+  }, []);
+
+  return currentRoom;
+}
+
+export function useRoomResult(): RoomResult | null {
+  const [result, setResult] = useState<RoomResult | null>(null);
+
+  useEffect(() => {
+    const subscription = chatService.roomResult$.subscribe(setResult);
+    return () => subscription.unsubscribe();
+  }, []);
+
+  return result;
+}
+
+export function useRoomUsers(): User[] {
+  const [users, setUsers] = useState<User[]>([]);
+
+  useEffect(() => {
+    const subscription = chatService.roomUsers$.subscribe(setUsers);
+    return () => subscription.unsubscribe();
+  }, []);
+
+  return users;
+}
+
+export function useRoomActions() {
+  const createRoom = useCallback((name: string, description: string, isPublic: boolean) => {
+    chatService.createRoom(name, description, isPublic);
+  }, []);
+
+  const joinRoom = useCallback((roomId: string) => {
+    chatService.joinRoom(roomId);
+  }, []);
+
+  const leaveRoom = useCallback((roomId: string) => {
+    chatService.leaveRoom(roomId);
+  }, []);
+
+  const getRooms = useCallback(() => {
+    chatService.getRooms();
+  }, []);
+
+  const getMyRooms = useCallback(() => {
+    chatService.getMyRooms();
+  }, []);
+
+  return { createRoom, joinRoom, leaveRoom, getRooms, getMyRooms };
 }

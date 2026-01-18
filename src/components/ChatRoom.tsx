@@ -3,7 +3,8 @@ import MessageList from './MessageList';
 import MessageInput from './MessageInput';
 import UserList from './UserList';
 import AvatarUpload from './AvatarUpload';
-import { useMessages, useUsers, useChatActions } from '../hooks/useChat';
+import { useMessages, useRoomUsers, useChatActions } from '../hooks/useChat';
+import type { Room } from '../types/chat';
 
 const SERVER_PORT = 3001;
 
@@ -16,12 +17,14 @@ interface ChatRoomProps {
   color: string;
   isAdmin: boolean;
   isGuest: boolean;
+  room: Room;
   onLogout: () => void;
+  onLeaveRoom: () => void;
 }
 
-export default function ChatRoom({ username, color, isAdmin, isGuest, onLogout }: ChatRoomProps) {
+export default function ChatRoom({ username, color, isAdmin, isGuest, room, onLogout, onLeaveRoom }: ChatRoomProps) {
   const messages = useMessages();
-  const users = useUsers();
+  const users = useRoomUsers();
   const onlineCount = users.filter(user => user.isOnline).length;
   const { sendMessage } = useChatActions();
   const [showUsers, setShowUsers] = useState(false);
@@ -36,7 +39,15 @@ export default function ChatRoom({ username, color, isAdmin, isGuest, onLogout }
     <div className="chat-room">
       <div className="chat-main">
         <header>
-          <h2>Gooser Chat</h2>
+          <div className="header-left">
+            <button className="back-btn" onClick={onLeaveRoom} title="Back to rooms">
+              &larr;
+            </button>
+            <div className="room-info">
+              <h2>{room.name}</h2>
+              {room.description && <span className="room-desc">{room.description}</span>}
+            </div>
+          </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <img
               src={`${getAvatarUrl(username)}?t=${avatarKey}`}
@@ -46,7 +57,10 @@ export default function ChatRoom({ username, color, isAdmin, isGuest, onLogout }
               onClick={() => !isGuest && setShowAvatarUpload(true)}
               title={isGuest ? 'Guests cannot change avatar' : 'Click to change avatar'}
             />
-            <span>Logged in as <span style={{ color }}>{username}</span>{isAdmin && ' (Admin)'}</span>
+            <span className="user-info">
+              <span style={{ color }}>{username}</span>
+              {isAdmin && <span className="admin-tag">(Admin)</span>}
+            </span>
             <button className="logout-btn" onClick={onLogout}>
               Logout
             </button>
